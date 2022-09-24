@@ -89,7 +89,7 @@ def addevent():
             return jsonify({"message":"Time slots has been occupied, Please choose another time :("})
         if event.eventDate == eventDate and eventTime < event.eventTime and eventTime < event.eventEndTime:
             return jsonify({"message":"Time slots has been occupied, Please choose another time :("})
-    if eventDate > eventEndTime:
+    if eventDate > eventEndDate:
         return jsonify({"message":"Invalid Date :("})
     if eventDate == datetime.now().date():
         if eventTime > eventEndTime:
