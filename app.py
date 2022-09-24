@@ -72,9 +72,9 @@ def getCanteenPerson():
 
 @app.route("/add-event", methods=["POST"])
 def addevent():
-    name = request.form['name'] if len(request.form['name'].strip()) > 0 and request.form['name'] is not None else return jsonify({"message":"Empty Name is not allowed :("}) 
-    eventName = request.form['event'] if len(request.form['event'].strip()) > 0 and request.form['event'] is not None else return jsonify({"message":"Empty Event is not allowed :("})
-    deptName = request.form['dept_name'] if len(request.form['dept_name'].strip()) > 0 and request.form['dept_name'] is not None else return jsonify({"message":"Empty Department Name is not allowed :("})
+    name = request.form['name']
+    eventName = request.form['event']
+    deptName = request.form['dept_name']
     eventDate = datetime.strptime(request.form['date'],"%d-%m-%Y").date()
     eventTime = datetime.strptime(request.form['time'],"%H:%M").time()
     eventEndDate = datetime.strptime(request.form['end_date'],"%d-%m-%Y").date()
