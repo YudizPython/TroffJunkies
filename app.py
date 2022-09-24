@@ -58,7 +58,8 @@ def getCanteenPerson():
         curr["EstTime"] = EstTime[i]
         res.append(curr)
 
-    return jsonify({"count": count, "total_seats": total_seats, "available_seats": available, "inside_canteen": res})
+    return render_template("index.html", count = count, total_seats = total_seats, available_seats = available, inside_canteen = res)
+    # return render_template("home.html")
 
 @app.route("/inside-canteen")
 def insideCanteen():
