@@ -1,7 +1,8 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, redirect
 import pandas as pd
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
+import requests
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///canteen.db"
@@ -31,11 +32,45 @@ class Event(db.Model):
     def __str__(self):
         return self.name
 
-@app.route("/")
-@app.route("/dashboard")
+@app.route("/", methods=["GET", "POST"])
+@app.route("/dashboard", methods=["GET", "POST"])
 def getCanteenPerson():
     if request.method == "POST":
-        pass
+        name = request.form['name']
+        eventName = request.form['event']
+        deptName = request.form['dept_name']
+        eventDate = datetime.strptime(request.form['date'],"%Y-%m-%d").date()
+        eventTime = datetime.strptime(request.form['time'],"%H:%M").time()
+        eventEndDate = datetime.strptime(request.form['end_date'],"%Y-%m-%d").date()
+        eventEndTime = datetime.strptime(request.form['end_time'],"%H:%M").time()
+        events = Event.query.all()
+        for event in events:
+            if event.eventDate == eventDate and eventTime >= event.eventTime and eventEndTime <= event.eventEndTime:
+                return jsonify({"message":"Time slots has been occupied, Please choose another time :("})
+            if event.eventDate == eventDate and eventTime < event.eventTime and eventEndTime > event.eventEndTime:
+                return jsonify({"message":"Time slots has been occupied, Please choose another time :("})
+            if event.eventDate == eventDate and event.eventEndTime > eventTime and event.eventEndTime < eventEndTime:
+                return jsonify({"message":"Time slots has been occupied, Please choose another time :("})
+            if event.eventDate == eventDate and eventTime < event.eventTime and eventTime < event.eventEndTime:
+                return jsonify({"message":"Time slots has been occupied, Please choose another time :("})
+        if eventDate > eventEndDate:
+            # return jsonify({"message":"Invalid Date :("})
+            return redirect('/')
+        if eventDate == datetime.now().date():
+            if eventTime > eventEndTime:
+                # return jsonify({"message":"Invalid Date :("})
+                return redirect('/')
+        if eventDate < datetime.now().date():
+            # return jsonify({"message":"Please choose future datetime :("})
+            return redirect('/')
+        if eventDate == datetime.now().date() and eventTime < datetime.now().time():
+            # return jsonify({"message":"Please choose future datetime :("})
+            return redirect('/')
+
+        db.session.add(Event(name=name, event=eventName, deptName=deptName, eventTime=eventTime, eventDate=eventDate, eventEndDate=eventEndDate, eventEndTime=eventEndTime, isApproved=True))
+        db.session.commit()
+        # return jsonify({"message": "Event added successfully!"})
+        return redirect('/')
 
     persons = pd.read_csv("insideCanteen.csv")
 
