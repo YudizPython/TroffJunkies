@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canteen Counter</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+</head>
+<body>
+    <h1>count: {{count}}</h1>
+    <h1>Total count: {{total_seats}}</h1>
+    <h1>Available seats: {{available_seats}}</h1>
+    <!-- <h1>{{inside_canteen}}</h1> -->
+
+    <div class="container">
+    <table class="table table-dark">
+        <tr>
+            <th>Name</th>
+            <th>Clock In time</th>
+            <th>Clock Out time</th>
+        </tr>
+        {%for person in inside_canteen%}
+        <tr>
+            <td>{{person['Name']}}</td>
+            <td>{{person['Time']}}</td>
+            <td>{{person['EstTime']}}</td>
+        </tr>
+        {%endfor%}
+    </table>
+    </div>  
+</body>
+</html>
+
