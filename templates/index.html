@@ -230,15 +230,23 @@
                             <!-- <span class="icon icon-paper-plane color2"></span> -->
                             <h1>📅</h1>
 
-                            <h2>Upcoming Event</h2>
-
+                            <h2>Upcoming Event | <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">Add</button>
+                            
                             <ul class="list-unstyled">
+
+                                <li>
+
+                                    <span>Booked By</span>
+
+                                    <span>{{upcoming_event['name']}}</span>
+
+                                </li>
 
                                 <li>
 
                                     <span>Department</span>
 
-                                    <span>Blockchain & AI/ML</span>
+                                    <span>{{upcoming_event['department_name']}}</span>
 
                                 </li>
 
@@ -246,7 +254,7 @@
 
                                     <span>Occasion</span>
 
-                                    <span>Birthday Party</span>
+                                    <span>{{upcoming_event['event']}}</span>
 
                                 </li>
 
@@ -254,7 +262,7 @@
 
                                     <span>From </span>
 
-                                    <span>25th Sept , 2022 10:30 AM</span>
+                                    <span>{{upcoming_event['event_date']}}, {{upcoming_event['event_time']}}</span>
 
                                 </li>
 
@@ -262,7 +270,7 @@
 
                                     <span>To</span>
 
-                                    <span>25th Sept , 2022 11:00 AM</span>
+                                    <span>{{upcoming_event['event_end_date']}}, {{upcoming_event['event_end_time']}}</span>
 
                                 </li>
 
@@ -452,7 +460,28 @@
 
     <!-- Ends: .how-it-works -->
 
-
+    <!-- All users List -->
+    <h1 style="text-align:center;">Persons in <span style="color: #f44336;">Canteen</span> Right Now</h1>
+    <div class="container">
+    <table class="table">
+        <thead class="thead-dark">
+        <tr>
+            <th>Name</th>
+            <th>Time</th>
+            <th>Est. Time</th>
+        </tr>
+        </thead>
+        <tbody>
+        {%for person in inside_canteen%}
+        <tr>
+            <td>{{person['Name']}}</td>
+            <td>{{person['Time']}}</td>
+            <td>{{person['EstTime']}}</td>
+        </tr>
+        {%endfor%}
+        </tbody>
+    </table>
+    </div>
 
     <!-- Starts: .project-flow -->
 
@@ -634,7 +663,7 @@
 
                 <div class="col-md-12 section-title">
 
-                    <h2>Upcomming
+                    <h2>Upcoming
 
                         <span>Events</span>
 
@@ -646,10 +675,7 @@
 
                 <!-- Ends: .section-title -->
 
-
-
-                <!-- Start: .single-event -->
-
+                {%for event in response_list%}
                 <div class="col-lg-10 offset-lg-1 col-md-12">
 
                     <div class="single-event">
@@ -660,7 +686,7 @@
 
                                 <div class="a-date">
 
-                                    <p>October 23rd
+                                    <p>{{event['event_date']}}
 
                                         <span>Canteen</span>
 
@@ -676,125 +702,10 @@
 
                                     <h3>
 
-                                        <a href="#">Blockchain AI/ML Department</a>
+                                        <a href="#">{{event['department_name']}}</a>
 
                                     </h3>
-                                    <p>Birthday celebration</p>
-                                    <!-- <p>exclusive multi-purpose 100% responsive template with powerful features. Simple and well-structured
-
-                                        coding, high quality and flexible layout.</p> -->
-
-                                </div>
-
-                            </div>
-
-                            <div class="col-lg-2 col-sm-12">
-
-                                <div class="a-icon">
-
-                                    <span >📅 </span>
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <!-- Ends: .single-event -->
-
-                <!-- Start: .single-event -->
-
-                <div class="col-lg-10 offset-lg-1 col-md-12">
-
-                    <div class="single-event">
-
-                        <div class="row">
-
-                            <div class="col-lg-3 col-sm-12">
-
-                                <div class="a-date">
-
-                                    <p>September 25th
-
-                                        <span>Canteen</span>
-
-                                    </p>
-
-                                </div>
-
-                            </div>
-
-                            <div class="col-lg-7 col-sm-12">
-
-                                <div class="a-desc">
-
-                                    <h3>
-
-                                        <a href="#">MEAN Department</a>
-
-                                    </h3>
-                                    <p>Team fun and Party </p>
-                                    <!-- <p>exclusive multi-purpose 100% responsive template with powerful features. Simple and well-structured
-
-                                        coding, high quality and flexible layout.</p> -->
-
-                                </div>
-
-                            </div>
-
-                            <div class="col-lg-2 col-sm-12">
-
-                                <div class="a-icon">
-
-                                    <span>📅</span>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <!-- Ends: .single-event -->
-
-                <!-- Start: .single-event -->
-
-                <div class="col-lg-10 offset-lg-1 col-md-12">
-
-                    <div class="single-event">
-
-                        <div class="row">
-
-                            <div class="col-lg-3 col-sm-12">
-
-                                <div class="a-date">
-
-                                    <p>September 26
-
-                                        <span>Canteen</span>
-
-                                    </p>
-
-                                </div>
-
-                            </div>
-
-                            <div class="col-lg-7 col-sm-12">
-
-                                <div class="a-desc">
-
-                                    <h3>
-
-                                        <a href="#">Game Department</a>
-
-                                    </h3>
-                                    <p> Lunch party  </p>
+                                    <p> {{event['event']}}  </p>
                                     <!-- <p>exclusive multi-purpose 100% responsive template with powerful features. Simple and well-structured
 
                                         coding, high quality and flexible layout.</p> -->
@@ -816,7 +727,7 @@
                     </div>
 
                 </div>
-
+                {%endfor%}
                 <!-- Ends: .single-event -->
 
 
@@ -902,7 +813,59 @@
     </section>
 
     <!-- Ends: Partners -->
-
+    
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Add Event</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            </div>
+            <div class="modal-body">
+            <form action="" method="POST">
+                <table>
+                    <tr>
+                        <th>Name</th>
+                        <td><input type="text" name="name"></td>
+                    </tr>
+                    <tr>
+                        <th>Department Name</th>
+                        <td><input type="text" name="dept_name"></td>
+                    </tr>
+                    <tr>
+                        <th>Event</th>
+                        <td><input type="text" name="event"></td>
+                    </tr>
+                    <tr>
+                        <th>Date</th>
+                        <td><input type="date" name="date"></td>
+                    </tr>
+                    <tr>
+                        <th>Time</th>
+                        <td><input type="time" name="time"></td>
+                    </tr>
+                    <tr>
+                        <th>End Date</th>
+                        <td><input type="date" name="end_date"></td>
+                    </tr>
+                    <tr>
+                        <th>End Time</th>
+                        <td><input type="time" name="end_time"></td>
+                    </tr>
+                </table>
+            
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <input type="submit" class="btn btn-primary" value="Submit">
+            </div>
+            </form>
+        </div>
+        </div>
+    </div>
 
 
     <!-- Starts: Footer -->
