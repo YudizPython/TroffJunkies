@@ -32,6 +32,7 @@ class Event(db.Model):
     def __str__(self):
         return self.name
 
+@app.route("/")
 @app.route("/dashboard")
 def getCanteenPerson():
     persons = pd.read_csv("insideCanteen.csv")
@@ -56,7 +57,7 @@ def getCanteenPerson():
     upcoming_event = dict()
     events = Event.query.all()
     if len(events) != 0:
-        up_event = event.query.filter_by(eventDate=(sorted(dateTimeList))[i].date()).filter_by(eventTime=(sorted(dateTimeList))[i].time()).all()[0]
+        up_event = Event.query.filter_by(eventDate=(sorted(dateTimeList))[i].date()).filter_by(eventTime=(sorted(dateTimeList))[i].time()).all()[0]
         upcoming_event['name'] = up_event.name
         upcoming_event['event'] = up_event.event
         upcoming_event['department_name'] = up_event.deptName
