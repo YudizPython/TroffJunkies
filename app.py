@@ -54,10 +54,11 @@ def getCanteenPerson():
         curr["EstTime"] = EstTime[i]
         res.append(curr)
     
+    #first upcoming event
     upcoming_event = dict()
     events = Event.query.all()
     if len(events) != 0:
-        up_event = Event.query.filter_by(eventDate=(sorted(dateTimeList))[i].date()).filter_by(eventTime=(sorted(dateTimeList))[i].time()).all()[0]
+        up_event = Event.query.filter_by(isApproved=True).order_by(Event.eventDate.asc()).order_by(Event.eventTime.asc())[0]
         upcoming_event['name'] = up_event.name
         upcoming_event['event'] = up_event.event
         upcoming_event['department_name'] = up_event.deptName
@@ -65,30 +66,40 @@ def getCanteenPerson():
         upcoming_event['event_time'] = str(up_event.eventTime)
         upcoming_event['event_end_date'] = str(up_event.eventEndDate)
         upcoming_event['event_end_time'] = str(up_event.eventEndTime)
+
     return render_template("index.html", count = count, total_seats = total_seats, available_seats = available, inside_canteen = res, upcoming_event = upcoming_event)
 
 
 @app.route("/add-event", methods=["POST"])
 def addevent():
-    name = request.form['name']
-    event = request.form['event']
-    deptName = request.form['dept_name']
+    name = request.form['name'] if len(request.form['name'].strip()) > 0 and request.form['name'] is not None else return jsonify({"message":"Empty Name is not allowed :("}) 
+    eventName = request.form['event'] if len(request.form['event'].strip()) > 0 and request.form['event'] is not None else return jsonify({"message":"Empty Event is not allowed :("})
+    deptName = request.form['dept_name'] if len(request.form['dept_name'].strip()) > 0 and request.form['dept_name'] is not None else return jsonify({"message":"Empty Department Name is not allowed :("})
     eventDate = datetime.strptime(request.form['date'],"%d-%m-%Y").date()
     eventTime = datetime.strptime(request.form['time'],"%H:%M").time()
     eventEndDate = datetime.strptime(request.form['end_date'],"%d-%m-%Y").date()
     eventEndTime = datetime.strptime(request.form['end_time'],"%H:%M").time()
     events = Event.query.all()
     for event in events:
-        if event.eventDate == eventDate:
-            if eventTime >= event.eventTime and eventEndTime <= event.eventEndTime:
-                return jsonify({"message":"Time slots has been occupied, Please choose another :("})
+        if event.eventDate == eventDate and eventTime >= event.eventTime and eventEndTime <= event.eventEndTime:
+            return jsonify({"message":"Time slots has been occupied, Please choose another time :("})
+        if event.eventDate == eventDate and eventTime < event.eventTime and eventEndTime > event.eventEndTime:
+            return jsonify({"message":"Time slots has been occupied, Please choose another time :("})
+        if event.eventDate == eventDate and event.eventEndTime > eventTime and event.eventEndTime < eventEndTime:
+            return jsonify({"message":"Time slots has been occupied, Please choose another time :("})
+        if event.eventDate == eventDate and eventTime < event.eventTime and eventTime < event.eventEndTime:
+            return jsonify({"message":"Time slots has been occupied, Please choose another time :("})
+    if eventDate > eventEndTime:
+        return jsonify({"message":"Invalid Date :("})
+    if eventDate == datetime.now().date():
+        if eventTime > eventEndTime:
+            return jsonify({"message":"Invalid Date :("})
     if eventDate < datetime.now().date():
         return jsonify({"message":"Please choose future datetime :("})
-    if eventDate == datetime.now().date():
-        if eventTime < datetime.now().time():
-            return jsonify({"message":"Please choose future datetime :("})
+    if eventDate == datetime.now().date() and eventTime < datetime.now().time():
+        return jsonify({"message":"Please choose future datetime :("})
 
-    db.session.add(Event(name=name, event=event, deptName=deptName, eventTime=eventTime, eventDate=eventDate, eventEndDate=eventEndDate, eventEndTime=eventEndTime, isApproved=True))
+    db.session.add(Event(name=name, event=eventName, deptName=deptName, eventTime=eventTime, eventDate=eventDate, eventEndDate=eventEndDate, eventEndTime=eventEndTime, isApproved=True))
     db.session.commit()
     return jsonify({"message": "Event added successfully!"})
 
@@ -96,12 +107,7 @@ def addevent():
 def upcoming_events():
     response_list = []
     dateTimeList = []
-    events = Event.query.all()
-    for event in events:
-        dateTime = datetime.combine(event.eventDate, event.eventTime)
-        dateTimeList.append(dateTime)
-    for i in range(len(dateTimeList)):
-        sorted_events = Event.query.filter_by(eventDate=(sorted(dateTimeList))[i].date()).filter_by(eventTime=(sorted(dateTimeList))[i].time()).all()
+    sorted_events = Event.query.filter_by(isApproved=True).order_by(Event.eventDate.asc()).order_by(Event.eventTime.asc())
     for j in sorted_events:
         response_dict = dict()
         response_dict['name'] = j.name
