@@ -108,7 +108,6 @@ while True:
                 counts[name] = counts.get(name, 0) + 1
 
             name = max(counts, key=counts.get)
-            print("counts.get(name)", counts.get(name))
             if counts.get(name) > 33:
                 name = name
             else:
