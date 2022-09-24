@@ -52,8 +52,19 @@ def getCanteenPerson():
         curr["Time"] = time[i]
         curr["EstTime"] = EstTime[i]
         res.append(curr)
-
-    return render_template("index.html", count = count, total_seats = total_seats, available_seats = available, inside_canteen = res)
+    
+    upcoming_event = dict()
+    events = Event.query.all()
+    if len(events) != 0:
+        up_event = event.query.filter_by(eventDate=(sorted(dateTimeList))[i].date()).filter_by(eventTime=(sorted(dateTimeList))[i].time()).all()[0]
+        upcoming_event['name'] = up_event.name
+        upcoming_event['event'] = up_event.event
+        upcoming_event['department_name'] = up_event.deptName
+        upcoming_event['event_date'] = str(up_event.eventDate)
+        upcoming_event['event_time'] = str(up_event.eventTime)
+        upcoming_event['event_end_date'] = str(up_event.eventEndDate)
+        upcoming_event['event_end_time'] = str(up_event.eventEndTime)
+    return render_template("index.html", count = count, total_seats = total_seats, available_seats = available, inside_canteen = res, upcoming_event = upcoming_event)
 
 
 @app.route("/add-event", methods=["POST"])
