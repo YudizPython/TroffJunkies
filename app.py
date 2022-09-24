@@ -21,21 +21,16 @@ class Canteen(db.Model):
 class Event(db.Model):
     sno = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
-    event_date = db.Column(db.Date ,nullable = False)
-    event_time =  db.Column(db.Time ,nullable = False)
-    department_name = db.Column(db.String(40),nullable = False)
+    event = db.Column(db.String(200),nullable=False)
+    eventDate = db.Column(db.Date ,nullable = False)
+    eventTime =  db.Column(db.Time ,nullable = False)
+    eventEndDate = db.Column(db.Date ,nullable = False)
+    eventEndTime =  db.Column(db.Time ,nullable = False)
+    deptName = db.Column(db.String(40),nullable = False)
+    isApproved = db.Column(db.Boolean, default=False)
 
     def __str__(self):
         return self.name
-
-@app.route("/count")
-def Count():
-    # api to count of persons in canteen
-    count = pd.read_csv('insideCanteen.csv')
-    count = len(count)
-    total_seats = 42
-    available = total_seats - count
-    return jsonify({"count": count, "total_seats": total_seats, "available": available})
 
 @app.route("/dashboard")
 def getCanteenPerson():
@@ -58,43 +53,70 @@ def getCanteenPerson():
         curr["EstTime"] = EstTime[i]
         res.append(curr)
 
-    return render_template("index.html", count = count, total_seats = total_seats, available_seats = available, inside_canteen = res)
-    # return render_template("home.html")
+    return jsonify({"count": count, "total_seats": total_seats, "available_seats": available, "inside_canteen": res})
 
-@app.route("/inside-canteen")
-def insideCanteen():
-    pass
 
-@app.route("/add-event", methods=["GET", "POST"])
+@app.route("/add-event", methods=["POST"])
 def addevent():
     name = request.form['name']
-    event_time = datetime.strptime(request.form['time'],"%H:%M").time()
-    event_date = datetime.strptime(request.form['date'],"%Y-%m-%d").date()
-    department = request.form['department']
-    db.session.add(Event(name=name, event_time=event_time, event_date=event_date, department_name=department))
-    db.session.commit()
-    return jsonify({"message": f"Event added successfully on {event_date} at {event_time}"})
+    event = request.form['event']
+    deptName = request.form['dept_name']
+    eventDate = datetime.strptime(request.form['date'],"%d-%m-%Y").date()
+    eventTime = datetime.strptime(request.form['time'],"%H:%M").time()
+    eventEndDate = datetime.strptime(request.form['end_date'],"%d-%m-%Y").date()
+    eventEndTime = datetime.strptime(request.form['end_time'],"%H:%M").time()
+    events = Event.query.all()
+    for event in events:
+        if event.eventDate == eventDate:
+            if eventTime >= event.eventTime and eventEndTime <= event.eventEndTime:
+                return jsonify({"message":"Time slots has been occupied, Please choose another :("})
+    if eventDate < datetime.now().date():
+        return jsonify({"message":"Please choose future datetime :("})
+    if eventDate == datetime.now().date():
+        if eventTime < datetime.now().time():
+            return jsonify({"message":"Please choose future datetime :("})
 
-@app.route('/upcoming-events')
+    db.session.add(Event(name=name, event=event, deptName=deptName, eventTime=eventTime, eventDate=eventDate, eventEndDate=eventEndDate, eventEndTime=eventEndTime, isApproved=True))
+    db.session.commit()
+    return jsonify({"message": "Event added successfully!"})
+
+@app.route('/upcoming-events', methods=["GET"])
 def upcoming_events():
-    list = []
-    all_data = Event.query.all()
-    test_list = []
-    for i in all_data:
-        date_and_time = datetime.combine(i.event_date, i.event_time)
-        test_list.append(date_and_time)
-    
-    print(test_list)
-    
-    for i in range(len(test_list)):
-        data = Event.query.filter_by(event_date=(sorted(test_list))[i]).all()
-        for j in data:
-            dict = {}
-            dict['name'] = j.name
-            dict['event_time'] = j.event_date
-            dict['department_name'] = j.department_name
-            list.append(dict)
-    return jsonify({'message':list})
+    response_list = []
+    dateTimeList = []
+    events = Event.query.all()
+    for event in events:
+        dateTime = datetime.combine(event.eventDate, event.eventTime)
+        dateTimeList.append(dateTime)
+    for i in range(len(dateTimeList)):
+        sorted_events = Event.query.filter_by(eventDate=(sorted(dateTimeList))[i].date()).filter_by(eventTime=(sorted(dateTimeList))[i].time()).all()
+    for j in sorted_events:
+        response_dict = dict()
+        response_dict['name'] = j.name
+        response_dict['event'] = j.event
+        response_dict['department_name'] = j.deptName
+        response_dict['event_date'] = str(j.eventDate)
+        response_dict['event_time'] = str(j.eventTime)
+        response_dict['event_end_date'] = str(j.eventEndDate)
+        response_dict['event_end_time'] = str(j.eventEndTime)
+        response_list.append(response_dict)
+    return jsonify({'message':response_list})
+
+@app.route('/approve-event/<id>', methods=["PUT"])
+def approve_event(id):
+    event = Event.query.filter_by(sno=id).all()
+    if len(event) != 0:
+        if request.form['isApproved'] == True:
+            event[0].isApproved = True
+            db.session.commit()
+            return jsonify({"message":"Updated successfully :)"})
+        else:
+            event[0].isApproved = False
+            db.session.commit()
+            return jsonify({"message":"Updated successfully :)"})
+    else:
+        return jsonify({"message":"Invalid ID :("})
 
 if __name__ == '__main__':
+    db.create_all()
     app.run(debug=True)
