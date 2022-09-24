@@ -1,4 +1,3 @@
-import json
 from flask import Flask, render_template, jsonify, request
 import pandas as pd
 from flask_sqlalchemy import SQLAlchemy
@@ -35,6 +34,9 @@ class Event(db.Model):
 @app.route("/")
 @app.route("/dashboard")
 def getCanteenPerson():
+    if request.method == "POST":
+        pass
+
     persons = pd.read_csv("insideCanteen.csv")
 
     # count of persons in canteen
@@ -67,7 +69,22 @@ def getCanteenPerson():
         upcoming_event['event_end_date'] = str(up_event.eventEndDate)
         upcoming_event['event_end_time'] = str(up_event.eventEndTime)
 
-    return render_template("index.html", count = count, total_seats = total_seats, available_seats = available, inside_canteen = res, upcoming_event = upcoming_event)
+    # all upcoming event
+    response_list = []
+    dateTimeList = []
+    sorted_events = Event.query.filter_by(isApproved=True).order_by(Event.eventDate.asc()).order_by(Event.eventTime.asc())
+    for j in sorted_events:
+        response_dict = dict()
+        response_dict['name'] = j.name
+        response_dict['event'] = j.event
+        response_dict['department_name'] = j.deptName
+        response_dict['event_date'] = str(j.eventDate)
+        response_dict['event_time'] = str(j.eventTime)
+        response_dict['event_end_date'] = str(j.eventEndDate)
+        response_dict['event_end_time'] = str(j.eventEndTime)
+        response_list.append(response_dict)
+
+    return render_template("index.html", count = count, total_seats = total_seats, available_seats = available, inside_canteen = res, upcoming_event = upcoming_event, response_list=response_list)
 
 
 @app.route("/add-event", methods=["POST"])
