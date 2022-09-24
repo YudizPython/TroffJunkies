@@ -31,6 +31,44 @@ class Event(db.Model):
 
     def __str__(self):
         return self.name
+    
+class Admin(db.Model):
+    id = db.Column(db.Integer,primary_key=True)
+    email = db.Column(db.String(50),nullable=True)
+    password = db.Column(db.String(50),nullable=True)
+
+# @app.route("/add")
+# def add():
+#     db.session.add(Admin(email="krupesh@gmail.com", password="123"))
+#     db.session.commit()
+
+@app.route('/admin',methods=['POST','GET'])
+def admin():
+    if request.method=='POST':
+        email = request.form['email']
+        password = request.form['password']
+        user_id = Admin.query.filter_by(email=email).first()
+        if (user_id.password==password):
+            response_list = []
+            dateTimeList = []
+            events = Event.query.all()
+            for event in events:
+                dateTime = datetime.combine(event.eventDate, event.eventTime)
+                dateTimeList.append(dateTime)
+            for i in range(len(dateTimeList)):
+                sorted_events = Event.query.filter_by(eventDate=(sorted(dateTimeList))[i].date()).filter_by(eventTime=(sorted(dateTimeList))[i].time()).all()
+            for j in sorted_events:
+                response_dict = dict()
+                response_dict['name'] = j.name
+                response_dict['event'] = j.event
+                response_dict['department_name'] = j.deptName
+                response_dict['event_date'] = str(j.eventDate)
+                response_dict['event_time'] = str(j.eventTime)
+                response_dict['event_end_date'] = str(j.eventEndDate)
+                response_dict['event_end_time'] = str(j.eventEndTime)
+                response_list.append(response_dict)
+            return render_template("admin-index.html",response_list=response_list)
+    return render_template("admin-login.html")
 
 @app.route("/", methods=["GET", "POST"])
 @app.route("/dashboard", methods=["GET", "POST"])
